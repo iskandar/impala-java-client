@@ -12,24 +12,33 @@ import com.cloudera.beeswax.api.*;
 
 public class ImpalaConnectTest
 {
-    private static String host="nceoricloud02.nce.amadeus.net";
-    private static int port=21050;
-    private static String stmt="SELECT * FROM document LIMIT 5";
+    private static String host="localhost";
+    private static String stmt="SHOW TABLES";
 
     public static void main(String [] args) 
     {
-        if (args.length < 3) {
-            System.out.println("Usage: ImpalaConnectTest host port");
+        if (args.length < 2) {
+            System.out.println("Usage: ImpalaConnectTest host query");
             return;
         }
         
         try {
             host = args[0];
-            port = Integer.parseInt(args[1]);
-            stmt = args[2];
+            stmt = args[1];
 
-            //ImpalaConnectTest.testConnectionBeeswax(host,port,stmt);
-            ImpalaConnectTest.testConnectionHiveServer2(host,port,stmt);
+            System.out.println("host: " + host + "");
+            System.out.println("stmt: " + stmt + "");
+
+            int hive2Port = 21050;
+            int beeswaxPort = 21000;
+
+            System.out.println("Testing with Hive2 on port: " + hive2Port + "");
+            ImpalaConnectTest.testConnectionHiveServer2(host, hive2Port, stmt);
+            System.out.println("---");
+
+            System.out.println("Testing with Beeswax on port: " + beeswaxPort + "");
+            ImpalaConnectTest.testConnectionBeeswax(host, beeswaxPort, stmt);
+            System.out.println("---");
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -42,6 +51,7 @@ public class ImpalaConnectTest
             TSocket transport = new TSocket(host,port);
             transport.open();
             TProtocol protocol = new TBinaryProtocol(transport);
+
             //connect to client
             ImpalaService$Client client = new ImpalaService.Client(protocol);
             client.PingImpalaService();
@@ -71,7 +81,6 @@ public class ImpalaConnectTest
                 if(results.has_more==false) {
                     done = true;
                 }
-
             }
         }
         catch(Exception e) {
@@ -90,8 +99,9 @@ public class ImpalaConnectTest
             
             transport.open();
             
-            String username = "pauldeschacht";
-            String password = "amadeus";
+            String username = "";
+            String password = "";
+
             TOpenSessionReq openReq = new TOpenSessionReq();
             openReq.setClient_protocol(TProtocolVersion.HIVE_CLI_SERVICE_PROTOCOL_V1);
             openReq.setUsername(username);

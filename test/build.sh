@@ -1,14 +1,19 @@
+#!/bin/bash
 
 # get the dependencies
+mkdir deps 2>/dev/null || true
+cd deps;
+if [ ! -f slf4j-simple-1.6.1.jar ]; then
+    wget http://www.java2s.com/Code/JarDownload/slf4j/slf4j-simple-1.6.1.jar.zip
+    unzip -n slf4j-simple-1.6.1.jar.zip
+fi
 
-mkdir deps; cd deps;
-wget http://www.java2s.com/Code/JarDownload/slf4j/slf4j-simple-1.6.1.jar.zip
-unzip -n slf4j-simple-1.6.1.jar.zip
 cd ..
+
 # compile and build the jar
-mkdir classes
+mkdir classes 2>/dev/null || true
 javac -cp ../jar/ImpalaService.jar:../deps/libthrift-0.9.1.jar -d classes src/org/ImpalaConnectTest.java
-mkdir jar
+mkdir jar 2>/dev/null || true
 jar -cvfm ./jar/ImpalaConnectTest.jar manifest.txt  -C classes .
-# run the example
-java -cp ../deps/libthrift-0.9.1.jar:../deps/slf4j.api-1.6.1.jar:./deps/slf4j-simple-1.6.1.jar:../jar/ImpalaService.jar:./jar/ImpalaConnectTest.jar org.ImpalaConnectTest.ImpalaConnectTest nceoricloud02.nce.amadeus.net 21050 "SHOW TABLES"
+
+echo "Build done"
